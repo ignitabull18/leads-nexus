@@ -1,0 +1,397 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create Supabase Project",
+        "description": "Set up a new Supabase project for the database using the Supabase CLI/API with the provided access token.",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Investigate the actual available MCP functions for Supabase or use the Supabase CLI/API directly.\n2. Use the Supabase access token found in the MCP configuration for authentication.\n3. Create a new Supabase project either through the available MCP functions or directly via Supabase CLI/API.\n4. Verify and confirm the associated costs through the Supabase dashboard.\n5. Store the project details (ID, API keys, etc.) securely for future use.\n6. Ensure that the project is set up in the correct region for optimal performance.\n\nImplementation guidance:\n- Use the latest Supabase JavaScript client (currently @supabase/supabase-js@2.26.0) for interacting with the project.\n- Set up environment variables for storing sensitive information like API keys.\n- Consider using a tool like Doppler or AWS Secrets Manager for managing these secrets in different environments.\n- Check for any existing Supabase configuration in the project before proceeding.",
+        "testStrategy": "1. Verify that the Supabase project is created successfully by checking the project dashboard.\n2. Ensure that the cost confirmation process works correctly through the Supabase dashboard.\n3. Test the connection to the new Supabase project using the provided credentials.\n4. Implement integration tests that verify the creation process using the actual implementation method (CLI/API).",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Investigate available MCP functions for Supabase",
+            "description": "Research the actual available MCP functions for Supabase integration or determine if direct Supabase CLI/API usage is required.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Locate and verify Supabase access token",
+            "description": "Find the Supabase access token in the MCP configuration and verify it's valid for creating projects.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create Supabase project",
+            "description": "Use either the discovered MCP functions or Supabase CLI/API with the access token to create a new project.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Configure environment variables",
+            "description": "Set up the necessary environment variables to store Supabase project credentials securely.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Document project creation process",
+            "description": "Document the actual method used to create the Supabase project for future reference.",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Enable pgvector Extension",
+        "description": "Enable the pgvector extension in the Supabase project to support vector operations.",
+        "details": "1. Use the `mcp_supabase_execute_sql` function to run the SQL command: `CREATE EXTENSION IF NOT EXISTS vector;`\n2. Verify that the extension is successfully enabled.\n\nImplementation guidance:\n- pgvector version: Use the latest version supported by Supabase (currently 0.4.0).\n- After enabling the extension, you can create vector columns and perform vector operations.\n- Consider setting up a post-deployment check to ensure the extension is always enabled, even after database updates or migrations.",
+        "testStrategy": "1. Execute a SQL query to check if the vector extension is enabled.\n2. Attempt to create a table with a vector column to ensure the extension is working correctly.\n3. Perform a simple vector operation (e.g., cosine similarity) to validate functionality.\n4. Include these checks in the CI/CD pipeline to ensure the extension remains enabled across deployments.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Define Database Schema",
+        "description": "Create the database schema using Drizzle ORM in the specified location.",
+        "details": "1. Install Drizzle ORM (npm install drizzle-orm@0.26.5 drizzle-kit@0.19.3).\n2. In `apps/server/src/db/schema.ts`, define the following tables using Drizzle:\n   - `leads`: \n     * id: uuid (primary key)\n     * category: enum['influencer', 'journalist', 'publisher']\n     * name: text\n     * email: text\n     * bio: text\n     * source_url: text\n     * embedding: vector(1536)\n   - `lead_metadata`: \n     * id: uuid (primary key)\n     * lead_id: uuid (foreign key to leads.id)\n     * related_lead_id: uuid (foreign key to leads.id)\n     * relationship_type: text\n3. Use Zod for schema validation.\n4. Set up indexes on `category` and `embedding` columns.\n\nImplementation guidance:\n- Use Drizzle's `pgTable`, `uuid`, `text`, `pgEnum`, and custom `vector` type for schema definition.\n- For the vector type, you may need to create a custom Drizzle column type.\n- Use Zod (zod@3.21.4) to create validation schemas that match your Drizzle schema.\n- For the HNSW index on the embedding column, use: `CREATE INDEX ON leads USING hnsw (embedding vector_cosine_ops);`\n- Consider adding a unique constraint on the email column in the leads table.",
+        "testStrategy": "1. Write unit tests for the schema definitions using a test database.\n2. Validate that the Zod schemas correctly match the Drizzle schemas.\n3. Test index creation and verify their existence in the database.\n4. Perform CRUD operations on the defined tables to ensure they work as expected.\n5. Test vector operations on the embedding column to verify pgvector functionality.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Generate and Apply Migrations",
+        "description": "Generate migration files from the Drizzle schema and apply them to the database.",
+        "details": "1. Use `bun db:generate` to create migration files based on the Drizzle schema.\n2. Review the generated migration files for accuracy.\n3. Apply migrations to the test database using `bun db:migrate`.\n4. Use `mcp_supabase_apply_migration` for any Supabase-specific migrations.\n\nImplementation guidance:\n- Set up separate configuration for test and production databases in your Drizzle config.\n- Use Drizzle's `drizzle-kit` for migration generation and application.\n- For Supabase-specific migrations, you may need to use the Supabase CLI (supabase@1.68.6) in addition to the MCP function.\n- Consider implementing a rollback strategy for migrations in case of failures.\n- Use transactions for complex migrations to ensure data integrity.",
+        "testStrategy": "1. Verify that migration files are generated correctly and match the schema.\n2. Test the migration process on a clean test database.\n3. Implement integration tests that apply migrations and verify the resulting database structure.\n4. Test rollback procedures for migrations.\n5. Verify that Supabase-specific migrations are applied correctly using the MCP function.",
+        "priority": "high",
+        "dependencies": [
+          3
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Data Seeding",
+        "description": "Create a script to seed initial data into the database.",
+        "details": "1. Create a seeding script that uses either `mcp_supabase_execute_sql` or Drizzle to insert sample data.\n2. Include sample leads for each category (influencer, journalist, publisher).\n3. Generate realistic embeddings for the sample leads (you can use OpenAI's API for this).\n4. Insert sample metadata to demonstrate relationships between leads.\n\nImplementation guidance:\n- Use Faker.js (faker@6.6.6) to generate realistic sample data.\n- For embeddings, use OpenAI's text-embedding-ada-002 model via the OpenAI API (openai@3.3.0).\n- Implement the seeding script as an async function to handle API calls and database operations.\n- Use batch inserts for better performance when seeding large amounts of data.\n- Consider creating a separate seeding script for the test database with a smaller dataset.",
+        "testStrategy": "1. Verify that the seeding script runs without errors.\n2. Check that the correct number of records are inserted into each table.\n3. Validate the structure and content of the inserted data.\n4. Test querying the seeded data, including vector similarity searches.\n5. Ensure that the seeding process is idempotent (can be run multiple times without duplicating data).",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Security Measures",
+        "description": "Apply security best practices to the database setup and query execution.",
+        "details": "1. Implement parameterized queries for all database operations.\n2. Set up least privilege access for database users.\n3. Configure SSL for database connections.\n4. Implement proper error handling to prevent information leakage.\n5. Set up audit logging for sensitive operations.\n\nImplementation guidance:\n- Use Drizzle's query builder to create parameterized queries, avoiding string concatenation.\n- Create separate database roles for different access levels (read-only, read-write, admin).\n- Use Supabase's Row Level Security (RLS) features to implement fine-grained access control.\n- Implement a central error handling mechanism that logs errors without exposing sensitive information.\n- Use Supabase's built-in audit logging features or implement custom logging using a separate table.\n- Consider using a SQL injection prevention library like sql-template-strings (sql-template-strings@2.2.2) for raw SQL queries.",
+        "testStrategy": "1. Attempt SQL injection attacks on all database query points to ensure they are properly parameterized.\n2. Verify that different user roles have the correct level of access to database resources.\n3. Test SSL/TLS connection to the database.\n4. Simulate various error conditions and ensure that error messages do not reveal sensitive information.\n5. Verify that audit logs are created for sensitive operations.\n6. Perform a security scan using a tool like OWASP ZAP to identify potential vulnerabilities.",
+        "priority": "high",
+        "dependencies": [
+          5
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create Leads tRPC Router",
+        "description": "Create a new tRPC router for leads functionality in the specified path and integrate it with the existing app router.",
+        "details": "1. Create a new file at `apps/server/src/routers/leads.ts`\n2. Set up the basic router structure:\n```typescript\nimport { publicProcedure, router } from '../trpc';\nimport { z } from 'zod';\n\nexport const leadsRouter = router({\n  // Procedures will be added in subsequent tasks\n});\n```\n3. Import and add the leads router to the main app router in `apps/server/src/routers/index.ts`:\n```typescript\nimport { leadsRouter } from './leads';\n\nexport const appRouter = router({\n  // existing routers\n  leads: leadsRouter,\n});\n```\n4. Export the router types for client consumption",
+        "testStrategy": "1. Verify the router is properly exported and accessible\n2. Run the server with `bun dev` and confirm no startup errors\n3. Test the router's presence using a tRPC client test that connects to the server",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement searchLeads Endpoint",
+        "description": "Create a tRPC endpoint for searching leads using vector similarity search with Mem-0 Graph RAG and Supabase.",
+        "details": "1. Add the searchLeads procedure to the leads router:\n```typescript\nimport { publicProcedure, router } from '../trpc';\nimport { z } from 'zod';\nimport { mem0 } from '../lib/mem0';\nimport { db } from '../db';\nimport { leads } from '../db/schema';\n\n// Define category enum based on your lead categories\nconst LeadCategoryEnum = z.enum(['influencer', 'business', 'investor', 'other']);\n\nexport const leadsRouter = router({\n  searchLeads: publicProcedure\n    .input(z.object({\n      query: z.string(),\n      category: LeadCategoryEnum.optional(),\n      page: z.number().int().positive().default(1),\n      pageSize: z.number().int().positive().default(10)\n    }))\n    .query(async ({ input }) => {\n      const { query, category, page, pageSize } = input;\n      \n      // Generate embedding for the search query using OpenAI/Google API\n      const embedding = await mem0.generateEmbedding(query);\n      \n      // Build the Supabase query with pagination\n      let dbQuery = db.select()\n        .from(leads)\n        .limit(pageSize)\n        .offset((page - 1) * pageSize);\n      \n      // Add vector similarity search\n      dbQuery = dbQuery.orderBy(sql`embedding <-> ${embedding}`);\n      \n      // Add category filter if provided\n      if (category) {\n        dbQuery = dbQuery.where(eq(leads.category, category));\n      }\n      \n      const results = await dbQuery;\n      const totalCount = await db.select({ count: sql`count(*)` })\n        .from(leads)\n        .where(category ? eq(leads.category, category) : undefined);\n      \n      return {\n        items: results,\n        pagination: {\n          page,\n          pageSize,\n          totalItems: totalCount[0].count,\n          totalPages: Math.ceil(totalCount[0].count / pageSize)\n        }\n      };\n    }),\n});\n```\n2. Ensure Mem-0 Graph RAG is properly initialized in a separate module\n3. Set up proper error handling with try/catch blocks and structured error responses",
+        "testStrategy": "1. Unit test the endpoint with mock data and embeddings\n2. Test vector similarity search with sample queries\n3. Verify pagination works correctly with different page sizes\n4. Test category filtering\n5. Verify error handling for invalid inputs",
+        "priority": "high",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement getLead Endpoint",
+        "description": "Create a tRPC endpoint for fetching a single lead by its UUID.",
+        "details": "1. Add the getLead procedure to the leads router:\n```typescript\nimport { publicProcedure, router } from '../trpc';\nimport { z } from 'zod';\nimport { db } from '../db';\nimport { leads } from '../db/schema';\nimport { eq } from 'drizzle-orm';\nimport { TRPCError } from '@trpc/server';\n\nexport const leadsRouter = router({\n  // ... other procedures\n  \n  getLead: publicProcedure\n    .input(z.object({\n      id: z.string().uuid()\n    }))\n    .query(async ({ input }) => {\n      const { id } = input;\n      \n      try {\n        const lead = await db.select()\n          .from(leads)\n          .where(eq(leads.id, id))\n          .limit(1);\n        \n        if (!lead.length) {\n          throw new TRPCError({\n            code: 'NOT_FOUND',\n            message: `Lead with ID ${id} not found`\n          });\n        }\n        \n        return lead[0];\n      } catch (error) {\n        // Log the error\n        console.error('Error fetching lead:', error);\n        \n        // Rethrow as TRPCError if not already\n        if (!(error instanceof TRPCError)) {\n          throw new TRPCError({\n            code: 'INTERNAL_SERVER_ERROR',\n            message: 'Failed to fetch lead details'\n          });\n        }\n        throw error;\n      }\n    }),\n});\n```\n2. Ensure proper error handling for cases where the lead doesn't exist\n3. Add logging for debugging purposes",
+        "testStrategy": "1. Unit test the endpoint with valid and invalid UUIDs\n2. Test error handling for non-existent leads\n3. Verify the correct lead data is returned for valid IDs\n4. Test with malformed UUIDs to ensure validation works",
+        "priority": "medium",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement ingestLeads Endpoint",
+        "description": "Create a tRPC endpoint for ingesting leads from URLs using FireCrawl for scraping and AI for entity recognition.",
+        "details": "1. Add the ingestLeads procedure to the leads router:\n```typescript\nimport { publicProcedure, router } from '../trpc';\nimport { z } from 'zod';\nimport { db } from '../db';\nimport { leads } from '../db/schema';\nimport { mem0 } from '../lib/mem0';\nimport { fireCrawl } from '../lib/firecrawl';\nimport { extractEntities } from '../lib/ai';\n\nexport const leadsRouter = router({\n  // ... other procedures\n  \n  ingestLeads: publicProcedure\n    .input(z.object({\n      urls: z.array(z.string().url())\n    }))\n    .mutation(async ({ input }) => {\n      const { urls } = input;\n      const results = [];\n      const errors = [];\n      \n      for (const url of urls) {\n        try {\n          // Use FireCrawl to scrape the URL\n          const scrapedData = await fireCrawl.crawl(url);\n          \n          // Use AI to extract entities and relevant information\n          const extractedEntities = await extractEntities(scrapedData.content);\n          \n          // Generate embeddings for the extracted data\n          const embedding = await mem0.generateEmbedding(JSON.stringify(extractedEntities));\n          \n          // Store in Supabase via Drizzle\n          const newLeads = await db.insert(leads)\n            .values({\n              name: extractedEntities.name,\n              description: extractedEntities.description,\n              category: extractedEntities.category,\n              contactInfo: extractedEntities.contactInfo,\n              sourceUrl: url,\n              embedding: embedding,\n              // Add other fields as needed\n            })\n            .returning();\n          \n          // Add to Mem-0 Graph\n          await mem0.addNode({\n            id: newLeads[0].id,\n            type: 'lead',\n            properties: extractedEntities,\n            embedding: embedding\n          });\n          \n          // Add relationships if detected\n          if (extractedEntities.relationships) {\n            for (const rel of extractedEntities.relationships) {\n              await mem0.addEdge({\n                source: newLeads[0].id,\n                target: rel.targetId,\n                type: rel.type,\n                properties: rel.properties\n              });\n            }\n          }\n          \n          results.push(newLeads[0]);\n        } catch (error) {\n          console.error(`Error processing URL ${url}:`, error);\n          errors.push({ url, error: error.message });\n        }\n      }\n      \n      return {\n        success: results.length > 0,\n        processed: urls.length,\n        successful: results.length,\n        failed: errors.length,\n        results,\n        errors\n      };\n    }),\n});\n```\n2. Create helper modules for FireCrawl integration, entity extraction, and embedding generation\n3. Implement proper error handling to ensure partial failures don't stop the entire process\n4. Add detailed logging for debugging and monitoring",
+        "testStrategy": "1. Unit test with mock URLs and crawl responses\n2. Test entity extraction with sample HTML content\n3. Verify embedding generation and storage\n4. Test error handling with invalid or inaccessible URLs\n5. Verify Mem-0 Graph integration with mock graph operations",
+        "priority": "high",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Integrate Mem-0 Graph RAG",
+        "description": "Set up and integrate the Mem-0 SDK for graph-based retrieval augmented generation to enhance lead search capabilities.",
+        "details": "1. Install the Mem-0 SDK:\n```bash\nbun add mem0-sdk\n```\n2. Create a wrapper module at `apps/server/src/lib/mem0.ts`:\n```typescript\nimport { Mem0Client, GraphNode, GraphEdge } from 'mem0-sdk';\nimport { config } from '../config';\n\nclass Mem0Service {\n  private client: Mem0Client;\n  \n  constructor() {\n    this.client = new Mem0Client({\n      apiKey: config.MEM0_API_KEY,\n      // Other configuration options\n    });\n  }\n  \n  async generateEmbedding(text: string): Promise<number[]> {\n    return this.client.embeddings.create({\n      input: text,\n      model: 'text-embedding-ada-002' // Or your preferred model\n    });\n  }\n  \n  async addNode(node: Omit<GraphNode, 'id'> & { id?: string }): Promise<GraphNode> {\n    return this.client.graph.createNode(node);\n  }\n  \n  async addEdge(edge: Omit<GraphEdge, 'id'>): Promise<GraphEdge> {\n    return this.client.graph.createEdge(edge);\n  }\n  \n  async search(query: string, options?: { limit?: number, filter?: any }): Promise<GraphNode[]> {\n    const embedding = await this.generateEmbedding(query);\n    return this.client.graph.search({\n      embedding,\n      limit: options?.limit || 10,\n      filter: options?.filter\n    });\n  }\n  \n  async queryWithNaturalLanguage(query: string): Promise<any> {\n    return this.client.rag.query({\n      query,\n      // Configure RAG options\n    });\n  }\n}\n\nexport const mem0 = new Mem0Service();\n```\n3. Integrate with the existing AI stream in `apps/server/src/index.ts`:\n```typescript\n// In your AI stream handler\nimport { mem0 } from './lib/mem0';\n\n// Example integration\nasync function handleAIQuery(query: string) {\n  // Use Mem-0 Graph RAG to enhance the response\n  const ragResults = await mem0.queryWithNaturalLanguage(query);\n  \n  // Combine with your existing AI processing\n  // ...\n}\n```\n4. Set up environment variables for Mem-0 API keys and configuration",
+        "testStrategy": "1. Unit test the Mem0Service wrapper with mock responses\n2. Test embedding generation with sample texts\n3. Verify graph operations (node/edge creation)\n4. Test natural language querying with sample queries\n5. Verify integration with the AI stream",
+        "priority": "high",
+        "dependencies": [
+          7
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Integrate FireCrawl for Web Scraping",
+        "description": "Set up and integrate FireCrawl for web scraping capabilities to extract lead information from URLs.",
+        "status": "done",
+        "dependencies": [
+          7
+        ],
+        "priority": "high",
+        "details": "This task has been completed as part of task #10. The implementation includes:\n\n1. FireCrawl SDK integration using the @mendable/firecrawl-js package\n\n2. FireCrawl service wrapper implemented at src/lib/firecrawl.ts with the following methods:\n   - scrapeUrl: For scraping a single URL\n   - scrapeUrls: For batch scraping multiple URLs\n\n3. Entity extraction using Google's Gemini AI implemented at src/lib/entity-extraction.ts\n\n4. Full integration in the ingestLeads endpoint\n\n5. Environment variable configuration for FIRECRAWL_API_KEY\n\nAll functionality has been successfully implemented, tested, and is working as expected.",
+        "testStrategy": "The following tests have been completed:\n\n1. Unit tests for the FireCrawlService with mock responses\n2. Testing of URL scraping with sample URLs\n3. Verification of error handling for invalid or inaccessible URLs\n4. Testing of entity extraction with sample HTML content using Gemini AI\n5. Verification of integration between scraping and entity extraction in the ingestLeads endpoint",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Create Basic Leads Page Structure",
+        "description": "Create the initial leads page structure in the specified directory with basic layout components",
+        "details": "Create a new file at `apps/web/src/app/leads/page.tsx` with the basic page structure. Use existing UI components from `apps/web/src/components/ui/`. The page should include a layout with sections for the search bar and results grid. Use React 19 patterns and ensure the component is server-side rendered appropriately for Next.js.\n\n```tsx\n// apps/web/src/app/leads/page.tsx\nimport { Suspense } from 'react';\nimport { Card, CardContent } from '@/components/ui/card';\nimport { Skeleton } from '@/components/ui/skeleton';\n\nexport default function LeadsPage() {\n  return (\n    <div className=\"container py-8 space-y-6\">\n      <h1 className=\"text-3xl font-bold\">Leads Dashboard</h1>\n      \n      {/* Search section placeholder */}\n      <div className=\"search-container\">\n        {/* Search component will go here */}\n      </div>\n      \n      {/* Results grid placeholder */}\n      <div className=\"results-container\">\n        <Suspense fallback={<LeadsGridSkeleton />}>\n          {/* Results grid will go here */}\n        </Suspense>\n      </div>\n      \n      {/* Admin section placeholder (conditionally rendered) */}\n      <div className=\"admin-section\">\n        {/* Admin form will go here */}\n      </div>\n    </div>\n  );\n}\n\nfunction LeadsGridSkeleton() {\n  return (\n    <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\">\n      {Array(6).fill(0).map((_, i) => (\n        <Card key={i}>\n          <CardContent className=\"p-4\">\n            <Skeleton className=\"h-4 w-3/4 mb-2\" />\n            <Skeleton className=\"h-4 w-1/2\" />\n          </CardContent>\n        </Card>\n      ))}\n    </div>\n  );\n}\n```",
+        "testStrategy": "Verify the page renders without errors. Check that the basic layout structure is in place with placeholders for search, results, and admin sections. Ensure the component follows React 19 patterns and Next.js best practices. Test the skeleton loading state renders correctly.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement Search Bar Component",
+        "description": "Create a natural language search input component that integrates with the RAG system via tRPC",
+        "details": "Create a search bar component that accepts natural language input and connects to the RAG system via tRPC. The component should handle user input, manage loading states, and trigger searches.\n\n```tsx\n// apps/web/src/app/leads/components/search-bar.tsx\n'use client';\n\nimport { useState } from 'react';\nimport { useForm } from 'react-hook-form';\nimport { api } from '@/trpc/react';\nimport { Button } from '@/components/ui/button';\nimport { Input } from '@/components/ui/input';\nimport { Form, FormControl, FormField, FormItem } from '@/components/ui/form';\n\ntype SearchFormValues = {\n  query: string;\n};\n\nexport function SearchBar({ onSearchResults }: { onSearchResults: (results: any[]) => void }) {\n  const [isSearching, setIsSearching] = useState(false);\n  \n  const form = useForm<SearchFormValues>({\n    defaultValues: {\n      query: '',\n    },\n  });\n\n  const searchMutation = api.leads.search.useMutation({\n    onSuccess: (data) => {\n      setIsSearching(false);\n      onSearchResults(data);\n    },\n    onError: (error) => {\n      setIsSearching(false);\n      console.error('Search error:', error);\n      // Handle error state\n    },\n  });\n\n  function onSubmit(values: SearchFormValues) {\n    if (!values.query.trim()) return;\n    \n    setIsSearching(true);\n    searchMutation.mutate({ query: values.query });\n  }\n\n  return (\n    <Form {...form}>\n      <form onSubmit={form.handleSubmit(onSubmit)} className=\"space-y-4\">\n        <FormField\n          control={form.control}\n          name=\"query\"\n          render={({ field }) => (\n            <FormItem>\n              <FormControl>\n                <div className=\"flex gap-2\">\n                  <Input \n                    placeholder=\"Search leads using natural language...\" \n                    className=\"flex-1\"\n                    {...field} \n                    aria-label=\"Search query\"\n                  />\n                  <Button \n                    type=\"submit\" \n                    disabled={isSearching}\n                    aria-label=\"Search\"\n                  >\n                    {isSearching ? 'Searching...' : 'Search'}\n                  </Button>\n                </div>\n              </FormControl>\n            </FormItem>\n          )}\n        />\n      </form>\n    </Form>\n  );\n}\n```",
+        "testStrategy": "Test the search bar component with various inputs. Verify form submission works correctly. Mock the tRPC mutation to test success and error states. Ensure loading states are displayed correctly. Test accessibility by verifying proper ARIA attributes and keyboard navigation.",
+        "priority": "high",
+        "dependencies": [
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement Results Grid Component",
+        "description": "Create a grid component to display lead information cards with copy functionality",
+        "details": "Create a results grid component that displays lead information in card format. Each card should show lead details and include a copy button for the email that uses the sonner toast library for notifications.\n\n```tsx\n// apps/web/src/app/leads/components/results-grid.tsx\n'use client';\n\nimport { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';\nimport { Button } from '@/components/ui/button';\nimport { toast } from 'sonner';\nimport { Copy } from 'lucide-react';\n\ntype Lead = {\n  id: string;\n  name: string;\n  email: string;\n  category: string;\n  // Add other lead properties as needed\n};\n\nexport function ResultsGrid({ leads }: { leads: Lead[] }) {\n  if (!leads.length) {\n    return (\n      <div className=\"text-center py-8\">\n        <p className=\"text-muted-foreground\">No leads found. Try a different search query.</p>\n      </div>\n    );\n  }\n\n  const copyToClipboard = async (text: string, leadName: string) => {\n    try {\n      await navigator.clipboard.writeText(text);\n      toast.success(`Email for ${leadName} copied to clipboard`);\n    } catch (err) {\n      console.error('Failed to copy:', err);\n      toast.error('Failed to copy email');\n    }\n  };\n\n  return (\n    <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\">\n      {leads.map((lead) => (\n        <Card key={lead.id}>\n          <CardHeader>\n            <CardTitle>{lead.name}</CardTitle>\n          </CardHeader>\n          <CardContent>\n            <p className=\"text-sm font-medium\">Category: {lead.category}</p>\n            <p className=\"text-sm text-muted-foreground\">{lead.email}</p>\n          </CardContent>\n          <CardFooter>\n            <Button \n              variant=\"outline\" \n              size=\"sm\" \n              onClick={() => copyToClipboard(lead.email, lead.name)}\n              className=\"w-full\"\n              aria-label={`Copy ${lead.name}'s email`}\n            >\n              <Copy className=\"h-4 w-4 mr-2\" />\n              Copy Email\n            </Button>\n          </CardFooter>\n        </Card>\n      ))}\n    </div>\n  );\n}\n```",
+        "testStrategy": "Test the results grid with various lead data sets, including empty results. Verify cards display correctly with all lead information. Test the copy functionality by mocking navigator.clipboard and verifying toast notifications. Check responsive layout at different screen sizes. Test accessibility features including keyboard navigation and ARIA attributes.",
+        "priority": "high",
+        "dependencies": [
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Admin Ingestion Form",
+        "description": "Create a conditionally rendered admin form to trigger lead data ingestion",
+        "details": "Create an admin section with a form to trigger lead data ingestion. This section should be conditionally rendered based on user permissions. The form will connect to the backend via tRPC to initiate the ingestion process.\n\n```tsx\n// apps/web/src/app/leads/components/admin-ingestion-form.tsx\n'use client';\n\nimport { useState } from 'react';\nimport { useForm } from 'react-hook-form';\nimport { api } from '@/trpc/react';\nimport { Button } from '@/components/ui/button';\nimport { Input } from '@/components/ui/input';\nimport { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from '@/components/ui/form';\nimport { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';\nimport { toast } from 'sonner';\n\ntype IngestionFormValues = {\n  source: string;\n};\n\nexport function AdminIngestionForm() {\n  const [isProcessing, setIsProcessing] = useState(false);\n  \n  const form = useForm<IngestionFormValues>({\n    defaultValues: {\n      source: '',\n    },\n  });\n\n  const ingestionMutation = api.leads.ingestData.useMutation({\n    onSuccess: () => {\n      setIsProcessing(false);\n      form.reset();\n      toast.success('Lead ingestion started successfully');\n    },\n    onError: (error) => {\n      setIsProcessing(false);\n      toast.error(`Ingestion failed: ${error.message}`);\n    },\n  });\n\n  function onSubmit(values: IngestionFormValues) {\n    if (!values.source.trim()) return;\n    \n    setIsProcessing(true);\n    ingestionMutation.mutate({ source: values.source });\n  }\n\n  return (\n    <Card>\n      <CardHeader>\n        <CardTitle>Admin Controls</CardTitle>\n      </CardHeader>\n      <CardContent>\n        <Form {...form}>\n          <form onSubmit={form.handleSubmit(onSubmit)} className=\"space-y-4\">\n            <FormField\n              control={form.control}\n              name=\"source\"\n              render={({ field }) => (\n                <FormItem>\n                  <FormLabel>Data Source</FormLabel>\n                  <FormControl>\n                    <Input placeholder=\"Enter data source URL or identifier\" {...field} />\n                  </FormControl>\n                  <FormDescription>\n                    Specify the source to ingest lead data from\n                  </FormDescription>\n                </FormItem>\n              )}\n            />\n            <Button \n              type=\"submit\" \n              disabled={isProcessing}\n              className=\"w-full\"\n            >\n              {isProcessing ? 'Processing...' : 'Start Ingestion'}\n            </Button>\n          </form>\n        </Form>\n      </CardContent>\n    </Card>\n  );\n}\n```",
+        "testStrategy": "Test the admin form with various inputs. Mock the tRPC mutation to test success and error states. Verify form validation works correctly. Test loading states during submission. Ensure the form resets after successful submission. Test toast notifications for success and error cases. Verify the component is only rendered for users with appropriate permissions.",
+        "priority": "medium",
+        "dependencies": [
+          13
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement TanStack Query Integration",
+        "description": "Set up TanStack Query for tRPC calls to fetch and manage lead data",
+        "details": "Implement TanStack Query integration for fetching lead data through tRPC. This will handle caching, loading states, and error handling for API calls. Reference the existing implementation in `apps/web/src/app/page.tsx` and adapt it for the leads page.\n\n```tsx\n// apps/web/src/app/leads/hooks/use-leads-query.ts\n'use client';\n\nimport { useState } from 'react';\nimport { api } from '@/trpc/react';\n\ntype LeadQueryParams = {\n  limit?: number;\n  category?: string;\n};\n\nexport function useLeadsQuery(initialParams: LeadQueryParams = { limit: 10 }) {\n  const [queryParams, setQueryParams] = useState<LeadQueryParams>(initialParams);\n  \n  const leadsQuery = api.leads.getLeads.useQuery(queryParams, {\n    staleTime: 1000 * 60 * 5, // 5 minutes\n    refetchOnWindowFocus: false,\n  });\n\n  const refreshLeads = () => {\n    leadsQuery.refetch();\n  };\n\n  const updateQueryParams = (newParams: Partial<LeadQueryParams>) => {\n    setQueryParams(prev => ({\n      ...prev,\n      ...newParams\n    }));\n  };\n\n  return {\n    leads: leadsQuery.data || [],\n    isLoading: leadsQuery.isLoading,\n    isError: leadsQuery.isError,\n    error: leadsQuery.error,\n    refreshLeads,\n    updateQueryParams,\n  };\n}\n```",
+        "testStrategy": "Test the hook with various query parameters. Mock the tRPC response to test different data states. Verify caching behavior works as expected. Test refetching functionality. Ensure loading and error states are properly managed. Test the hook in combination with UI components to verify integration.",
+        "priority": "high",
+        "dependencies": [
+          13,
+          14,
+          15
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Implement User Permission Check for Admin Section",
+        "description": "Add logic to conditionally render the admin section based on user permissions",
+        "details": "Implement a mechanism to check user permissions and conditionally render the admin section. This should use the existing authentication system to determine if the current user has admin privileges.\n\n```tsx\n// apps/web/src/app/leads/hooks/use-admin-access.ts\n'use client';\n\nimport { useSession } from 'next-auth/react';\n\nexport function useAdminAccess() {\n  const { data: session, status } = useSession();\n  \n  const isLoading = status === 'loading';\n  const isAuthenticated = status === 'authenticated';\n  \n  // Check if user has admin role or permissions\n  // This logic should match your application's permission system\n  const hasAdminAccess = isAuthenticated && \n    session?.user?.role === 'admin';\n  \n  return {\n    isLoading,\n    isAuthenticated,\n    hasAdminAccess,\n  };\n}\n\n// Usage in page component:\n// apps/web/src/app/leads/page.tsx (partial)\n'use client';\n\nimport { AdminIngestionForm } from './components/admin-ingestion-form';\nimport { useAdminAccess } from './hooks/use-admin-access';\n\nfunction AdminSection() {\n  const { isLoading, hasAdminAccess } = useAdminAccess();\n  \n  if (isLoading) {\n    return <div className=\"py-4\"><Skeleton className=\"h-32 w-full\" /></div>;\n  }\n  \n  if (!hasAdminAccess) {\n    return null; // Don't render anything for non-admin users\n  }\n  \n  return <AdminIngestionForm />;\n}\n```",
+        "testStrategy": "Test the admin access hook with different user roles and authentication states. Mock the useSession hook to simulate various user scenarios. Verify the AdminSection component renders correctly for admin users and doesn't render for non-admin users. Test loading states during authentication checks.",
+        "priority": "medium",
+        "dependencies": [
+          16
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Integrate RAG Query System",
+        "description": "Connect the search functionality to the existing RAG (Retrieval Augmented Generation) system",
+        "details": "Integrate the search functionality with the existing RAG system by referencing the implementation in `apps/web/src/app/ai/page.tsx`. This will enable natural language processing of search queries to find relevant leads.\n\n```tsx\n// apps/web/src/app/leads/hooks/use-rag-search.ts\n'use client';\n\nimport { useState } from 'react';\nimport { api } from '@/trpc/react';\n\ntype SearchResult = {\n  id: string;\n  name: string;\n  email: string;\n  category: string;\n  relevanceScore: number;\n  // Add other properties as needed\n};\n\nexport function useRagSearch() {\n  const [results, setResults] = useState<SearchResult[]>([]);\n  const [isSearching, setIsSearching] = useState(false);\n  const [searchError, setSearchError] = useState<string | null>(null);\n\n  // Reference the existing AI chat implementation for RAG queries\n  const ragSearchMutation = api.ai.ragSearch.useMutation({\n    onSuccess: (data) => {\n      setResults(data.results);\n      setIsSearching(false);\n      setSearchError(null);\n    },\n    onError: (error) => {\n      setIsSearching(false);\n      setSearchError(error.message);\n      setResults([]);\n    },\n  });\n\n  const searchLeads = (query: string) => {\n    if (!query.trim()) return;\n    \n    setIsSearching(true);\n    setSearchError(null);\n    \n    ragSearchMutation.mutate({\n      query,\n      context: 'leads', // Specify context for the RAG system\n    });\n  };\n\n  return {\n    results,\n    isSearching,\n    searchError,\n    searchLeads,\n  };\n}\n```",
+        "testStrategy": "Test the RAG search hook with various search queries. Mock the tRPC mutation to test different response scenarios. Verify loading and error states are managed correctly. Test integration with the search bar component. Ensure search results are properly processed and displayed.",
+        "priority": "high",
+        "dependencies": [
+          14,
+          17
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Integrate and Finalize Leads Page",
+        "description": "Integrate all components into the leads page and implement final styling and accessibility improvements",
+        "details": "Integrate all the previously created components into the main leads page. Ensure proper state management between components, implement final styling, and add accessibility enhancements. Follow React 19 patterns and ensure the page meets all requirements from the PRD.\n\n```tsx\n// apps/web/src/app/leads/page.tsx\n'use client';\n\nimport { useState } from 'react';\nimport { Suspense } from 'react';\nimport { SearchBar } from './components/search-bar';\nimport { ResultsGrid } from './components/results-grid';\nimport { AdminIngestionForm } from './components/admin-ingestion-form';\nimport { useAdminAccess } from './hooks/use-admin-access';\nimport { useRagSearch } from './hooks/use-rag-search';\nimport { useLeadsQuery } from './hooks/use-leads-query';\nimport { Card, CardContent } from '@/components/ui/card';\nimport { Skeleton } from '@/components/ui/skeleton';\nimport { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';\n\nexport default function LeadsPage() {\n  const { hasAdminAccess } = useAdminAccess();\n  const { leads, isLoading: isLoadingLeads } = useLeadsQuery();\n  const { results: searchResults, isSearching, searchLeads } = useRagSearch();\n  const [activeTab, setActiveTab] = useState('all');\n  \n  // Determine which leads to display based on active tab and search state\n  const displayedLeads = searchResults.length > 0 ? searchResults : leads;\n\n  const handleSearch = (query: string) => {\n    searchLeads(query);\n  };\n\n  return (\n    <div className=\"container py-8 space-y-6\">\n      <h1 className=\"text-3xl font-bold\">Leads Dashboard</h1>\n      \n      <SearchBar onSearch={handleSearch} />\n      \n      <Tabs defaultValue=\"all\" value={activeTab} onValueChange={setActiveTab}>\n        <TabsList>\n          <TabsTrigger value=\"all\">All Leads</TabsTrigger>\n          <TabsTrigger value=\"recent\">Recent</TabsTrigger>\n          {/* Add more tabs as needed */}\n        </TabsList>\n        \n        <TabsContent value=\"all\" className=\"mt-4\">\n          <Suspense fallback={<LeadsGridSkeleton />}>\n            {isLoadingLeads || isSearching ? (\n              <LeadsGridSkeleton />\n            ) : (\n              <ResultsGrid leads={displayedLeads} />\n            )}\n          </Suspense>\n        </TabsContent>\n        \n        <TabsContent value=\"recent\" className=\"mt-4\">\n          {/* Recent leads implementation */}\n        </TabsContent>\n      </Tabs>\n      \n      {hasAdminAccess && (\n        <div className=\"mt-8 pt-8 border-t\">\n          <h2 className=\"text-2xl font-bold mb-4\">Admin Controls</h2>\n          <AdminIngestionForm />\n        </div>\n      )}\n    </div>\n  );\n}\n\nfunction LeadsGridSkeleton() {\n  return (\n    <div className=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\">\n      {Array(6).fill(0).map((_, i) => (\n        <Card key={i}>\n          <CardContent className=\"p-4\">\n            <Skeleton className=\"h-4 w-3/4 mb-2\" />\n            <Skeleton className=\"h-4 w-1/2\" />\n          </CardContent>\n        </Card>\n      ))}\n    </div>\n  );\n}\n```",
+        "testStrategy": "Perform comprehensive testing of the integrated page. Test all user flows including searching, viewing results, and admin functions. Verify state management works correctly between components. Test responsive design at various screen sizes. Conduct accessibility testing using tools like Lighthouse and axe. Verify keyboard navigation works throughout the page. Test with screen readers to ensure proper ARIA attributes and semantic HTML.",
+        "priority": "high",
+        "dependencies": [
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Add Hostinger VPS to Coolify",
+        "description": "Deploy the leads-nexus application to Coolify (which is already running on a VPS) to prepare for production use.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Access the Coolify dashboard that's already running on the VPS\n2. Use the `mcp_coolify_deploy_application` command with the following parameters:\n   - Application name (e.g., 'leads-nexus')\n   - Git repository URL\n   - Branch name (e.g., 'main' or 'production')\n   - Build configuration settings\n3. Configure deployment settings in Coolify for the application:\n   - Set up build commands\n   - Configure port mappings\n   - Set resource limits\n4. Verify the application deployment is successful\n5. Store application deployment ID for future reference in subsequent tasks",
+        "testStrategy": "Verify application deployment is successful by checking the output of the `mcp_coolify_deploy_application` command. Confirm the application appears in the Coolify dashboard with correct details. Test that the application is accessible via its assigned URL and functioning properly.",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Validate Server Configuration",
+        "description": "Validate the Hostinger VPS server configuration to ensure it meets all requirements for deployment.",
+        "details": "1. Use the `mcp_coolify_validate_server` command with the server ID obtained from the previous task\n2. Check validation results for any issues with:\n   - SSH connectivity\n   - System requirements\n   - Docker installation\n   - Network configuration\n3. Address any validation errors that appear\n4. Re-run validation until all checks pass successfully\n5. Document any specific configuration adjustments made for future reference",
+        "testStrategy": "Ensure all validation checks pass with no errors. Verify Docker is properly installed and running on the server. Confirm network connectivity and SSH access are working correctly.",
+        "priority": "high",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Create Project and Environment",
+        "description": "Set up the project and environment in Coolify, connecting to the source code repository and configuring the required ports.",
+        "details": "1. Use the `mcp_coolify_create_application` command with the following parameters:\n   - Server ID from task #21\n   - Git repository URL\n   - Branch name (e.g., 'main' or 'production')\n   - Application name\n2. Configure port exposure:\n   - Expose port 3000 for the main application\n   - Expose port 3001 for additional services if needed\n3. Set up build configuration if required (build command, output directory)\n4. Configure auto-deployment settings based on repository updates\n5. Save the application ID for future reference",
+        "testStrategy": "Verify the application is created successfully in Coolify. Confirm the repository connection works by checking if Coolify can access the codebase. Validate that ports 3000 and 3001 are properly configured for exposure.",
+        "priority": "high",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Deploy Supabase Instance",
+        "description": "Set up and deploy a Supabase instance as a service using Coolify's service management tools.",
+        "details": "1. Use the `mcp_coolify_create_service` command with the following parameters:\n   - Server ID from task #21\n   - Service type: 'supabase'\n   - Service name (e.g., 'production-db')\n2. Configure Supabase settings:\n   - Database password\n   - JWT secret\n   - Storage settings\n   - Any other required Supabase configurations\n3. Link the Supabase service to the application created in task #23\n4. Note the Supabase URL and credentials for environment variable configuration\n5. Verify Supabase service is running correctly",
+        "testStrategy": "Verify Supabase instance is deployed successfully. Test database connectivity. Confirm that the Supabase dashboard is accessible and all services (Auth, Storage, etc.) are functioning correctly.",
+        "priority": "high",
+        "dependencies": [
+          23
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Configure Domains and SSL",
+        "description": "Set up domain names and SSL certificates for the deployed application and services.",
+        "details": "1. Use the `mcp_coolify_get_server_domains` command to check current domain configurations\n2. Add domain names for:\n   - Main application (e.g., app.yourdomain.com)\n   - API endpoints if needed\n   - Supabase instance if public access is required\n3. Configure SSL certificates for all domains\n4. Verify DNS settings are correctly pointing to the Hostinger VPS IP\n5. Test domain accessibility and SSL certificate validity\n6. Set up any required redirects (e.g., www to non-www)",
+        "testStrategy": "Verify all domains resolve to the correct IP address. Confirm SSL certificates are valid and working (check for padlock in browser). Test HTTPS connections to all configured domains. Validate certificate expiration dates and renewal settings.",
+        "priority": "medium",
+        "dependencies": [
+          23,
+          24
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 26,
+        "title": "Configure Environment Variables and Monitoring",
+        "description": "Set up environment variables for the application and configure monitoring for the server resources.",
+        "details": "1. Configure environment variables in the application:\n   - Supabase URL from task #24\n   - FireCrawl API key\n   - Any other required environment variables\n2. Disable gzip compression if Server-Sent Events (SSE) are used, as mentioned in the PRD\n3. Set up monitoring using `mcp_coolify_get_server_resources` command\n4. Configure alerts for critical resource thresholds (CPU, memory, disk space)\n5. Test the application with the configured environment variables\n6. Document all environment variables and their purposes for future reference",
+        "testStrategy": "Verify all environment variables are correctly set and accessible by the application. Test the application functionality that depends on these variables (Supabase connection, FireCrawl API). Confirm monitoring is working by checking resource usage data. Test SSE functionality with gzip disabled to ensure no issues occur.",
+        "priority": "medium",
+        "dependencies": [
+          24,
+          25
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-18T05:50:57.128Z",
+      "updated": "2025-07-18T20:04:11.875Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

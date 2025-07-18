@@ -1,0 +1,41 @@
+---
+globs: *.ts,*.tsx,*.js,*.jsx,*.py
+---
+
+# Code Style & Conventions
+
+## General Guidelines
+- Use `termcolor` for printing messages at every step to keep users informed
+- Always include `encoding="utf-8"` when using `with open` for consistent file encoding
+- Define **major variables** in **ALL CAPS** at the top of scripts (except user input)
+- Avoid embedding user input in variable definitions unless explicitly required
+
+## File Organization
+- **Maximum 200 lines of code per file**
+- Split large files into smaller, focused modules
+- Use meaningful file names that reflect their purpose
+- Group related functionality together
+- Extract reusable logic into separate utility files
+
+## Error Handling
+- Use `try-except` blocks with **descriptive error messages**
+- Ensure error outputs are informative and include exception details
+- Example:
+```python
+try:
+    result = some_operation()
+except SomeException as e:
+    print(f"Error during operation: {e}")
+    raise
+```
+
+## Design Principles
+- Implement **Separation of Concerns** in every project
+- Enhance modularity and maintainability
+- Keep functions focused on single responsibilities
+
+## TypeScript/JavaScript
+- Use strict TypeScript configuration
+- Prefer type-safe patterns
+- Use proper async/await patterns
+- Implement proper error boundaries in React components

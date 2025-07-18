@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# Leads Nexus Project Structure
+
+This is a monorepo with the following structure:
+
+## Applications
+- **`apps/web/`** - Next.js web application with React 19 + TypeScript 5.7
+- **`apps/native/`** - React Native/Expo mobile application
+- **`apps/server/`** - tRPC server with Drizzle ORM
+- **`apps/docs/`** - Astro documentation site
+
+## Key Files & Directories
+- **Root**: [package.json](mdc:package.json), [turbo.json](mdc:turbo.json), [biome.json](mdc:biome.json)
+- **Web App**: [apps/web/src/app/layout.tsx](mdc:apps/web/src/app/layout.tsx), [apps/web/next.config.ts](mdc:apps/web/next.config.ts)
+- **Native App**: [apps/native/app/_layout.tsx](mdc:apps/native/app/_layout.tsx), [apps/native/app.json](mdc:apps/native/app.json)
+- **Server**: [apps/server/src/index.ts](mdc:apps/server/src/index.ts), [apps/server/drizzle.config.ts](mdc:apps/server/drizzle.config.ts)
+- **Docs**: [apps/docs/astro.config.mjs](mdc:apps/docs/astro.config.mjs)
+
+## Development Flow
+1. Always check the specific app directory for context
+2. Use tRPC for client-server communication
+3. Shared utilities in `packages/` (when created)
+4. UI components in respective app directories
+# Leads Nexus Project Structure
+
+This is a monorepo with the following structure:
+
+## Applications
+- **`apps/web/`** - Next.js web application with React 19 + TypeScript 5.7
+- **`apps/native/`** - React Native/Expo mobile application
+- **`apps/server/`** - tRPC server with Drizzle ORM
+- **`apps/docs/`** - Astro documentation site
+
+## Key Files & Directories
+- **Root**: [package.json](mdc:package.json), [turbo.json](mdc:turbo.json), [biome.json](mdc:biome.json)
+- **Web App**: [apps/web/src/app/layout.tsx](mdc:apps/web/src/app/layout.tsx), [apps/web/next.config.ts](mdc:apps/web/next.config.ts)
+- **Native App**: [apps/native/app/_layout.tsx](mdc:apps/native/app/_layout.tsx), [apps/native/app.json](mdc:apps/native/app.json)
+- **Server**: [apps/server/src/index.ts](mdc:apps/server/src/index.ts), [apps/server/drizzle.config.ts](mdc:apps/server/drizzle.config.ts)
+- **Docs**: [apps/docs/astro.config.mjs](mdc:apps/docs/astro.config.mjs)
+
+## Development Flow
+1. Always check the specific app directory for context
+2. Use tRPC for client-server communication
+3. Shared utilities in `packages/` (when created)
+4. UI components in respective app directories

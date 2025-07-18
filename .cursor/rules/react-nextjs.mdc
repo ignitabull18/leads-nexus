@@ -1,0 +1,47 @@
+---
+globs: apps/web/**/*.tsx,apps/web/**/*.ts,apps/native/**/*.tsx,apps/native/**/*.ts
+---
+
+# React & Next.js Patterns
+
+## Component Architecture
+- Use functional components with hooks
+- Implement proper TypeScript interfaces for props
+- Use React.memo for performance optimization when needed
+- Follow compound component pattern for complex components
+
+## State Management
+- Use React Context for global state
+- Implement custom hooks for reusable logic
+- Use useReducer for complex state logic
+- Consider Zustand for advanced state management
+
+## Next.js App Router
+- Use Server Components by default
+- Add "use client" directive only when needed
+- Implement proper loading and error states
+- Use proper metadata API for SEO
+
+## tRPC Integration
+- Use tRPC hooks for API calls
+- Implement proper error handling with tRPC
+- Use optimistic updates where appropriate
+- Follow tRPC router patterns in [apps/server/src/routers/](mdc:apps/server/src/routers/)
+
+## Performance
+- Implement proper code splitting
+- Use Next.js Image optimization
+- Implement proper caching strategies
+- Use Suspense boundaries appropriately
+
+## UI Components
+- Use shadcn/ui components from [apps/web/src/components/ui/](mdc:apps/web/src/components/ui/)
+- Implement consistent design system
+- Use proper theming with CSS variables
+- Follow accessibility guidelines (ARIA labels, keyboard navigation)
+
+## Testing
+- Write unit tests for components
+- Implement integration tests for user flows
+- Use React Testing Library patterns
+- Test error boundaries and loading states

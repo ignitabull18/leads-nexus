@@ -1,0 +1,4 @@
+# Section 5: Data Ingestion Pipeline
+
+- **Sources**: Start with public directories (e.g., influencers via Instagram/Twitter APIs, journalists via Muck Rack, publishers via Google News).
+- **Process**:\n  1. Admin provides seed URLs (e.g., via dashboard form).\n  2. Use FireCrawl MCP to scrape content.\n  3. Extract entities (name, email, etc.) using AI (Vercel SDK).\n  4. Generate embeddings and store in Supabase.\n  5. Build Mem-0 graph for RAG (e.g., link journalists to publishers).\n- **MVP Scale**: Aim for 500-1000 leads initially. Run ingestion as a one-off script (later automate via cron). 

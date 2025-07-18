@@ -1,0 +1,53 @@
+---
+description: Database and API patterns for leads management
+---
+
+# Database & API Patterns
+
+## Database Operations (Drizzle ORM)
+- Use Drizzle ORM patterns from [apps/server/src/db/](mdc:apps/server/src/db/)
+- Implement proper schema definitions
+- Use transactions for multi-table operations
+- Follow database normalization principles
+
+## API Design (tRPC)
+- Use tRPC routers in [apps/server/src/routers/](mdc:apps/server/src/routers/)
+- Implement proper input validation with Zod schemas
+- Use proper HTTP status codes
+- Follow RESTful principles even with tRPC
+
+## Lead Management Patterns
+- Implement proper lead scoring algorithms
+- Use pagination for large datasets
+- Implement search and filtering capabilities
+- Track lead lifecycle stages
+
+## Data Validation
+- Use Zod for runtime type checking
+- Validate all inputs at API boundaries
+- Implement proper sanitization
+- Use TypeScript for compile-time safety
+
+## Error Handling
+- Implement proper error boundaries
+- Use structured error responses
+- Log errors with context
+- Provide meaningful error messages
+
+## Performance Optimization
+- Use database indexes appropriately
+- Implement caching strategies
+- Use connection pooling
+- Optimize queries to avoid N+1 problems
+
+## Security
+- Implement proper authentication
+- Use parameterized queries
+- Validate and sanitize all inputs
+- Follow principle of least privilege
+
+## Testing
+- Write unit tests for database operations
+- Use test databases for integration tests
+- Mock external API calls
+- Test error scenarios

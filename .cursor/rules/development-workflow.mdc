@@ -1,0 +1,51 @@
+---
+description: Development workflow and tool preferences
+---
+
+# Development Workflow & Tools
+
+## Core Requirements
+- **Always use UV** for Python package management
+- **Ensure .venv is activated** before running Python commands
+- **Use Composio** for third-party integrations (unless unavailable)
+- **Review code structure** before and after executing tasks
+- **Refresh knowledge** of framework docs when implementing new features
+
+## Database & Authentication
+- **Always use Supabase MCP server** for database operations
+- **Use Supabase MCP** for all migrations and schema changes
+- **Use Supabase MCP** for authentication setup and management
+- **Use Supabase MCP** for user management and security policies
+- **Use Supabase MCP** for database queries and data operations
+- Prefer Supabase MCP tools over direct SQL when possible
+
+## Framework-Specific Guidelines
+
+### Next.js Web App (`apps/web/`)
+- Use App Router architecture
+- Implement React 19 features and patterns
+- Use shadcn/ui components from [apps/web/src/components/ui/](mdc:apps/web/src/components/ui/)
+- Follow tRPC patterns for API communication
+
+### React Native App (`apps/native/`)
+- Use Expo Router for navigation
+- Follow React Native best practices
+- Implement platform-specific optimizations
+- Use native components when appropriate
+
+### tRPC Server (`apps/server/`)
+- Use Drizzle ORM for database operations
+- Implement proper type safety
+- Follow tRPC router patterns
+- Use proper error handling
+
+### Astro Docs (`apps/docs/`)
+- Use Astro's content collections
+- Follow documentation best practices
+- Implement proper SEO optimization
+
+## Quality Assurance
+- Always test changes thoroughly
+- Use TypeScript strict mode
+- Implement proper error boundaries
+- Follow accessibility guidelines
