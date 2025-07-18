@@ -44,4 +44,12 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
+app.get("/health", (c) => {
+  return c.json({ 
+    status: "healthy", 
+    timestamp: new Date().toISOString(),
+    service: "leads-nexus-api"
+  });
+});
+
 export default app;
